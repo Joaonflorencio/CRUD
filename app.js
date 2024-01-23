@@ -1,65 +1,65 @@
-const express = require('express');
-const app = express();
-const port = 4002 ;
+const express = require('express')
+const app = express()
 
 
-// Ruta para la raíz del sitio
-app.get('/', (req, res) => {
-    res.send('Bienvenido a la API de Street Fighter');
-});
+let usuarios = [
+  { id: 1, nombre: 'Ryu', edad: 32, lugarProcedencia: 'Japón' },
+  { id: 2, nombre: 'Chun-Li', edad: 29, lugarProcedencia: 'China' },
+  { id: 3, nombre: 'Guile', edad: 35, lugarProcedencia: 'Estados Unidos' },
+  { id: 4, nombre: 'Dhalsim', edad: 45, lugarProcedencia: 'India' },
+  { id: 5, nombre: 'Blanka', edad: 32, lugarProcedencia: 'Brasil' },
+];
 
-// Middleware para parsear el cuerpo de las solicitudes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Datos de ejemplo
-let usuarios = [
-    { id: 1, nombre: 'Ryu', edad: 32, lugarProcedencia: 'Japón' },
-    { id: 2, nombre: 'Chun-Li', edad: 29, lugarProcedencia: 'China' },
-    { id: 3, nombre: 'Guile', edad: 35, lugarProcedencia: 'Estados Unidos' },
-    { id: 4, nombre: 'Dhalsim', edad: 45, lugarProcedencia: 'India' },
-    { id: 5, nombre: 'Blanka', edad: 32, lugarProcedencia: 'Brasil' },
-];
 
-// Endpoints
 app.get('/usuarios', (req, res) => {
-    res.json(usuarios);
-});
+  res.json(usuarios)
+})
 
 app.post('/usuarios', (req, res) => {
-    const nuevoUsuario = req.body;
-    usuarios.push(nuevoUsuario);
-    res.status(201).send('Usuario creado');
-});
+  const nuevoUsuario = {
+    id: usuarios.length + 1,
+    nombre: req.body.nombre,
+    edad: req.body.edad,
+    lugarProcedencia: req.body.lugarProcedencia
+  }
+  usuarios.push(nuevoUsuario)
+  res.redirect("/usuarios")
+})
 
 app.get('/usuarios/:nombre', (req, res) => {
-    const nombre = req.params.nombre;
-    const usuario = usuarios.find(u => u.nombre === nombre);
-    if (usuario) {
-        res.json(usuario);
-    } else {
-        res.status(404).send('Usuario no encontrado');
-    }
-});
+  const nombre = req.params.nombre
+  const usuario = usuarios.find(user => user.nombre === nombre)
+
+  if(!usuario) {
+    res.status(404).json({mensaje: "usuario no encontrado"})
+  } else {
+    res.json(usuario)
+  }
+})
 
 app.put('/usuarios/:nombre', (req, res) => {
-    const nombre = req.params.nombre;
-    const index = usuarios.findIndex(u => u.nombre === nombre);
-    if (index !== -1) {
-        usuarios[index] = {...usuarios[index], ...req.body};
-        res.send('Usuario actualizado');
-    } else {
-        res.status(404).send('Usuario no encontrado');
-    }
-});
+  const nombreUsuario = req.params.nombre;
+  const index = usuarios.findIndex(usuario => usuario.nombre === nombreUsuario)
+
+  if(index === -1) {
+    res.status(404).json({mensaje: "usuario no encontrado"})
+  } else {
+    usuarios[index] = {id: usuarios[index].id, ...req.body}
+    res.json(usuarios)
+  }
+})
+
 
 app.delete('/usuarios/:nombre', (req, res) => {
-    const nombre = req.params.nombre;
-    usuarios = usuarios.filter(u => u.nombre !== nombre);
-    res.send('Usuario eliminado');
-});
+  const nombre = req.params.nombre
+  usuarios = usuarios.filter(usuario => usuario.nombre !== nombre)
+  res.json({mensaje: 'Usuario eliminado'}) 
+})
 
-// Iniciar el servidor
-app.listen(port, () => {
-    console.log(`Servidor ejecutándose en http://localhost:${port}`);
-});
+
+app.listen(3000, () => {
+  console.log('Express está escuchando en el puerto http://localhost:3000')
+})
